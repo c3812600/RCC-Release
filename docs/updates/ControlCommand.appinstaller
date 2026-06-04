@@ -2,13 +2,13 @@
 <AppInstaller
   xmlns="http://schemas.microsoft.com/appx/appinstaller/2018"
   Uri="https://c3812600.github.io/RCC-Release/updates/ControlCommand.appinstaller"
-  Version="2.1.1.0">
+  Version="2.1.2.0">
   <MainPackage
     Name="RCC.ControlCommand"
     Publisher="CN=RCC"
-    Version="2.1.1.0"
+    Version="2.1.2.0"
     ProcessorArchitecture="x64"
-    Uri="https://c3812600.github.io/RCC-Release/updates/ControlCommand_2.1.1.0_x64.msix" />
+    Uri="https://c3812600.github.io/RCC-Release/updates/ControlCommand_2.1.2.0_x64.msix" />
   <UpdateSettings>
     <OnLaunch HoursBetweenUpdateChecks="0" ShowPrompt="true" UpdateBlocksActivation="false" />
     <AutomaticBackgroundTask />
