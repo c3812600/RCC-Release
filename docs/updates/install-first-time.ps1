@@ -91,35 +91,31 @@ Add-AppxPackage -Path $msixPath -ForceApplicationShutdown
 Write-Host "Creating desktop shortcut..." -ForegroundColor Cyan
 
 Add-Type -AssemblyName System.Windows.Forms
-Add-Type -AssemblyName Microsoft.VisualBasic
 
 $desktopPath = [Environment]::GetFolderPath("Desktop")
 $lnkPath = Join-Path $desktopPath "ControlCommand.lnk"
+$desktopShortcutCreated = $false
 
-# Find the app entry in shell:AppsFolder by package name
-$shell = New-Object -ComObject WScript.Shell
-$appsFolder = (New-Object -ComObject Shell.Application).NameSpace("shell:AppsFolder")
-$targetItem = $null
+# Wait for system to register the MSIX package
+Start-Sleep -Seconds 3
 
-foreach ($item in $appsFolder.Items()) {
-    $appId = $item.Path
-    if ($appId -like "*RCC.ControlCommand*") {
-        $targetItem = $item
-        break
-    }
-}
+# Get the installed package info via Get-AppxPackage (more reliable than shell:AppsFolder)
+$pkg = Get-AppxPackage -Name "RCC.ControlCommand" -ErrorAction SilentlyContinue | Select-Object -First 1
 
-if ($targetItem) {
+if ($pkg) {
+    # AppUserModelID format: {PackageFamilyName}!{ApplicationId}
+    $appUserModelId = "$($pkg.PackageFamilyName)!ControlCommand"
+    $shell = New-Object -ComObject WScript.Shell
     $shortcut = $shell.CreateShortcut($lnkPath)
-    # MSIX apps are launched via shell:AppsFolder\AppUserModelId
     $shortcut.TargetPath = "explorer.exe"
-    $shortcut.Arguments = "shell:AppsFolder\$($targetItem.Path)"
+    $shortcut.Arguments = "shell:AppsFolder\$appUserModelId"
     $shortcut.WorkingDirectory = $desktopPath
     $shortcut.Description = "ControlCommand"
     $shortcut.Save()
+    $desktopShortcutCreated = $true
     Write-Host "Desktop shortcut created: $lnkPath" -ForegroundColor Green
 } else {
-    Write-Host "Could not find installed app in AppsFolder, skipping shortcut." -ForegroundColor Yellow
+    Write-Host "Could not find installed package, skipping shortcut." -ForegroundColor Yellow
 }
 
 # --- Completion dialog with Launch button ---
@@ -127,13 +123,19 @@ Write-Host ""
 Write-Host "Install completed successfully." -ForegroundColor Green
 Write-Host ("MSIX: " + $msixName)
 
+$msg = if ($desktopShortcutCreated) {
+    "ControlCommand installed successfully!`n`nA desktop shortcut has been created.`n`nClick 'Yes' to launch now, or 'No' to close."
+} else {
+    "ControlCommand installed successfully!`n`nClick 'Yes' to launch now, or 'No' to close."
+}
+
 $result = [System.Windows.Forms.MessageBox]::Show(
-    "ControlCommand installed successfully!`n`nA desktop shortcut has been created.`n`nClick 'Yes' to launch now, or 'No' to close.",
+    $msg,
     "Installation Complete",
     [System.Windows.Forms.MessageBoxButtons]::YesNo,
     [System.Windows.Forms.MessageBoxIcon]::Information
 )
 
-if ($result -eq [System.Windows.Forms.DialogResult]::Yes -and $targetItem) {
-    Start-Process "explorer.exe" "shell:AppsFolder\$($targetItem.Path)"
+if ($result -eq [System.Windows.Forms.DialogResult]::Yes -and $pkg) {
+    Start-Process "explorer.exe" "shell:AppsFolder\$($pkg.PackageFamilyName)!ControlCommand"
 }
