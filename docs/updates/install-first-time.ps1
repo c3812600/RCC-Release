@@ -87,6 +87,53 @@ Unblock-File -Path $msixPath -ErrorAction SilentlyContinue
 Write-Host "Installing ControlCommand..." -ForegroundColor Cyan
 Add-AppxPackage -Path $msixPath -ForceApplicationShutdown
 
+# --- Create desktop shortcut ---
+Write-Host "Creating desktop shortcut..." -ForegroundColor Cyan
+
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName Microsoft.VisualBasic
+
+$desktopPath = [Environment]::GetFolderPath("Desktop")
+$lnkPath = Join-Path $desktopPath "ControlCommand.lnk"
+
+# Find the app entry in shell:AppsFolder by package name
+$shell = New-Object -ComObject WScript.Shell
+$appsFolder = (New-Object -ComObject Shell.Application).NameSpace("shell:AppsFolder")
+$targetItem = $null
+
+foreach ($item in $appsFolder.Items()) {
+    $appId = $item.Path
+    if ($appId -like "*RCC.ControlCommand*") {
+        $targetItem = $item
+        break
+    }
+}
+
+if ($targetItem) {
+    $shortcut = $shell.CreateShortcut($lnkPath)
+    # MSIX apps are launched via shell:AppsFolder\AppUserModelId
+    $shortcut.TargetPath = "explorer.exe"
+    $shortcut.Arguments = "shell:AppsFolder\$($targetItem.Path)"
+    $shortcut.WorkingDirectory = $desktopPath
+    $shortcut.Description = "ControlCommand"
+    $shortcut.Save()
+    Write-Host "Desktop shortcut created: $lnkPath" -ForegroundColor Green
+} else {
+    Write-Host "Could not find installed app in AppsFolder, skipping shortcut." -ForegroundColor Yellow
+}
+
+# --- Completion dialog with Launch button ---
 Write-Host ""
 Write-Host "Install completed successfully." -ForegroundColor Green
 Write-Host ("MSIX: " + $msixName)
+
+$result = [System.Windows.Forms.MessageBox]::Show(
+    "ControlCommand installed successfully!`n`nA desktop shortcut has been created.`n`nClick 'Yes' to launch now, or 'No' to close.",
+    "Installation Complete",
+    [System.Windows.Forms.MessageBoxButtons]::YesNo,
+    [System.Windows.Forms.MessageBoxIcon]::Information
+)
+
+if ($result -eq [System.Windows.Forms.DialogResult]::Yes -and $targetItem) {
+    Start-Process "explorer.exe" "shell:AppsFolder\$($targetItem.Path)"
+}
