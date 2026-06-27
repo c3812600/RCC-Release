@@ -1,7 +1,7 @@
 #requires -Version 5.1
 [CmdletBinding()]
 param(
-    [string]$BaseUri = "https://c3812600.github.io/RCC-Release/updates",
+    [string]$BaseUri = "https://download.lonk.vip/updates",
     [string]$CertFileName = "RCC-msix.cer",
     [string]$AppInstallerFileName = "ControlCommand.appinstaller"
 )

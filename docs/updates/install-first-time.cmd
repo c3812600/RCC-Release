@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-set "SCRIPT_URL=https://c3812600.github.io/RCC-Release/updates/install-first-time.ps1"
+set "SCRIPT_URL=https://download.lonk.vip/updates/install-first-time.ps1"
 set "TEMP_SCRIPT=%TEMP%\RCC-install-first-time.ps1"
 
 echo Downloading first-time installer...
