@@ -2,13 +2,13 @@
 <AppInstaller
   xmlns="http://schemas.microsoft.com/appx/appinstaller/2018"
   Uri="https://download.lonk.vip/updates/ControlCommand.appinstaller"
-  Version="2.3.1.0">
+  Version="2.3.2.0">
   <MainPackage
     Name="RCC.ControlCommand"
     Publisher="CN=RCC"
-    Version="2.3.1.0"
+    Version="2.3.2.0"
     ProcessorArchitecture="x64"
-    Uri="https://releases.lonk.vip/ControlCommand_2.3.1.0_x64.msix" />
+    Uri="https://releases.lonk.vip/ControlCommand_2.3.2.0_x64.msix" />
   <UpdateSettings>
     <OnLaunch HoursBetweenUpdateChecks="0" ShowPrompt="true" UpdateBlocksActivation="false" />
     <AutomaticBackgroundTask />
